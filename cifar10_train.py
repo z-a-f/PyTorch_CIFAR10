@@ -6,18 +6,20 @@ from pytorch_lightning.callbacks import LearningRateLogger
 from pytorch_lightning.loggers import TensorBoardLogger
 from cifar10_module import CIFAR10_Module
 
+from cifar10_paths import kThisPath, kModelExtractPath
+
 def main(hparams):
-    
-    seed_everything(0)
-    
+
+    seed_everything(hparams.seed)
+
     # If only train on 1 GPU. Must set_device otherwise PyTorch always store model on GPU 0 first
     if type(hparams.gpus) == str:
         if len(hparams.gpus) == 2: # GPU number and comma e.g. '0,' or '1,'
             torch.cuda.set_device(int(hparams.gpus[0]))
-    
+
     # Model
     classifier = CIFAR10_Module(hparams)
-    
+
     # Trainer
     lr_logger = LearningRateLogger()
     logger = TensorBoardLogger("logs", name=hparams.classifier)
@@ -26,16 +28,16 @@ def main(hparams):
     trainer.fit(classifier)
 
     # Load best checkpoint
-    checkpoint_path = os.path.join(os.getcwd(), 'logs', hparams.classifier, 'version_' + str(classifier.logger.version),'checkpoints')
+    checkpoint_path = os.path.join(kThisPath, 'logs', hparams.classifier, 'version_' + str(classifier.logger.version),'checkpoints')
     classifier = CIFAR10_Module.load_from_checkpoint(os.path.join(checkpoint_path, os.listdir(checkpoint_path)[0]))
-    
+
     # Save weights from checkpoint
-    statedict_path = os.path.join(os.getcwd(), 'cifar10_models', 'state_dicts', hparams.classifier + '.pt')
+    statedict_path = os.path.join(kModelExtractPath, 'state_dicts', hparams.classifier + '.pt')
     torch.save(classifier.model.state_dict(), statedict_path)
-    
+
     # Test model
     trainer.test(classifier)
-    
+
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--classifier', type=str, default='resnet18')
@@ -45,5 +47,6 @@ if __name__ == '__main__':
     parser.add_argument('--max_epochs', type=int, default=100)
     parser.add_argument('--learning_rate', type=float, default=1e-2)
     parser.add_argument('--weight_decay', type=float, default=1e-2)
+    parser.add_argument('--seed', type=int, default=0)
     args = parser.parse_args()
     main(args)

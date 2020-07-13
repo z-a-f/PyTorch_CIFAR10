@@ -4,16 +4,19 @@ from argparse import ArgumentParser
 from pytorch_lightning import Trainer
 from cifar10_module import CIFAR10_Module
 
-def main(hparams):    
+def main(hparams):
     # If only train on 1 GPU. Must set_device otherwise PyTorch always store model on GPU 0 first
     if type(hparams.gpus) == str:
         if len(hparams.gpus) == 2: # GPU number and comma e.g. '0,' or '1,'
             torch.cuda.set_device(int(hparams.gpus[0]))
-            
+
+    save_to_path = os.path.join(kThisPath, 'test_temp')
+    os.makedirs(save_to_path, exist_ok=True)
+
     model = CIFAR10_Module(hparams, pretrained=True)
-    trainer = Trainer(gpus=hparams.gpus, default_save_path=os.path.join(os.getcwd(), 'test_temp'))
+    trainer = Trainer(gpus=hparams.gpus, default_save_path=save_to_path)
     trainer.test(model)
-    shutil.rmtree(os.path.join(os.getcwd(), 'test_temp'))
+    shutil.rmtree(save_to_path)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
