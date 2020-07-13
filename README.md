@@ -2,7 +2,7 @@ This is a fork from the https://github.com/huyvnphan/PyTorch_CIFAR10.
 
 Modifications:
 
-- Replaced some hard coded paths
+- Insignificantly minor changes to the save paths.
 
 # PyTorch models trained on CIFAR-10 dataset
 - I modified [TorchVision](https://pytorch.org/docs/stable/torchvision/models.html) official implementation of popular CNN models, and trained those on CIFAR-10 dataset.
